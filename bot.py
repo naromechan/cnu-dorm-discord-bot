@@ -17,53 +17,44 @@ BOARDS = {
 BASE_URL = "https://dorm.cnu.ac.kr"
 
 def send_discord_message(content):
-    try:
-        requests.post(WEBHOOK_URL, json={"content": content})
-    except:
-        pass
+    requests.post(WEBHOOK_URL, json={"content": content})
 
 def get_latest_posts(url, limit=5):
-    try:
-        r = requests.get(url, headers=HEADERS, timeout=10)
-        soup = BeautifulSoup(r.text, "html.parser")
+    r = requests.get(url, headers=HEADERS, timeout=10)
+    r.encoding = "utf-8"   # ✅ 한글 깨짐 방지
 
-        rows = soup.select("table tbody tr")
-        posts = []
+    soup = BeautifulSoup(r.text, "html.parser")
 
-        for row in rows:
-            link_tag = row.select_one("a")
-            if not link_tag:
-                continue
+    rows = soup.select("table tbody tr")
+    posts = []
 
-            title = link_tag.text.strip()
-            href = link_tag.get("href")
+    for row in rows:
+        link_tag = row.select_one("a")
+        if not link_tag:
+            continue
 
-            if not href:
-                continue
+        title = link_tag.get_text(strip=True)
 
-            if not href.startswith("http"):
-                link = BASE_URL + href
-            else:
-                link = href
+        href = link_tag.get("href")
+        if not href:
+            continue
 
-            posts.append((title, link))
+        # ✅ 게시글 상세페이지 링크 정확히 생성
+        if href.startswith("http"):
+            link = href
+        else:
+            link = BASE_URL + href
 
-            if len(posts) >= limit:
-                break
+        posts.append((title, link))
 
-        return posts
+        if len(posts) >= limit:
+            break
 
-    except Exception as e:
-        send_discord_message(f"❌ 에러 발생: {e}")
-        return []
+    return posts
 
 def main():
     for name, url in BOARDS.items():
         posts = get_latest_posts(url, limit=5)
-
-        if not posts:
-            send_discord_message(f"⚠ [{name}] 게시글을 찾지 못했습니다.")
-            continue
 
         for title, link in posts:
             message = f"📢 [{name}]\n{title}\n{link}"
