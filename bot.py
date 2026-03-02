@@ -16,7 +16,19 @@ BOARDS = [
         "name": "국제교류본부 / Student Recruiting",
         "url": "https://cnuint.cnu.ac.kr/cnuint/notice/recruit.do",
         "webhook_env": "WEBHOOK_INT_RECRUIT",
-    }
+    },
+    {
+        "key": "INT_EVENT",
+        "name": "국제교류본부 / Event",
+        "url": "https://cnuint.cnu.ac.kr/cnuint/notice/event.do",
+        "webhook_env": "WEBHOOK_INT_EVENT",
+    },
+    {
+        "key": "INT_JOB",
+        "name": "국제교류본부 / Job & Career",
+        "url": "https://cnuint.cnu.ac.kr/cnuint/notice/job.do",
+        "webhook_env": "WEBHOOK_INT_JOB",
+    },
 ]
 
 ID_RE = re.compile(r"(?:articleNo|no)=(\d+)", re.IGNORECASE)
