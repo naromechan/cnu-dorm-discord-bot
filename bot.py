@@ -1,100 +1,101 @@
-import requests
-from bs4 import BeautifulSoup
 import os
 import json
 import re
 from urllib.parse import urljoin
 
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
+import requests
+from bs4 import BeautifulSoup
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0"
-}
+HEADERS = {"User-Agent": "Mozilla/5.0"}
+STATE_FILE = "state.json"
 
-BOARDS = {
-    "입주/퇴거공지": "https://dorm.cnu.ac.kr/_prog/_board/?code=sub05_0501&site_dvs_cd=kr&menu_dvs_cd=030601",
-    "일반공지": "https://dorm.cnu.ac.kr/_prog/_board/?code=sub03_0301&site_dvs_cd=kr&menu_dvs_cd=0302",
-    "작업공지": "https://dorm.cnu.ac.kr/_prog/_board/?code=sub03_0302&site_dvs_cd=kr&menu_dvs_cd=0303",
-}
+# ✅ 일단 1개만 테스트: 국제교류본부 Student Recruiting
+BOARDS = [
+    {
+        "key": "INT_RECRUIT",
+        "name": "국제교류본부 / Student Recruiting",
+        "url": "https://cnuint.cnu.ac.kr/cnuint/notice/recruit.do",
+        "webhook_env": "WEBHOOK_INT_RECRUIT",  # ✅ 너가 방금 만든 Secret 이름
+    }
+]
 
-DATA_FILE = "latest_posts.json"
+ID_RE = re.compile(r"(?:articleNo|no)=(\d+)", re.IGNORECASE)
 
 
-def load_data():
-    if not os.path.exists(DATA_FILE):
+def load_state() -> dict:
+    if not os.path.exists(STATE_FILE):
         return {}
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
+    with open(STATE_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def save_data(data):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+def save_state(state: dict) -> None:
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
 
 
-def send_discord_message(content):
-    requests.post(WEBHOOK_URL, json={"content": content})
+def send_discord(webhook_url: str, text: str) -> None:
+    requests.post(webhook_url, json={"content": text}, timeout=15)
 
 
-def get_recent_posts(url, limit=10):
-    r = requests.get(url, headers=HEADERS, timeout=10)
+def extract_id(s: str) -> int | None:
+    m = ID_RE.search(s or "")
+    return int(m.group(1)) if m else None
+
+
+def get_recent_posts(list_url: str, limit: int = 12) -> list[dict]:
+    r = requests.get(list_url, headers=HEADERS, timeout=20)
     r.encoding = "utf-8"
-
     soup = BeautifulSoup(r.text, "html.parser")
-    rows = soup.select("table tbody tr")
 
+    rows = soup.select("table tbody tr")
     posts = []
 
     for row in rows[:limit]:
-        link_tag = row.select_one("a")
-        if not link_tag:
+        a = row.select_one("a")
+        if not a:
             continue
 
-        title = link_tag.get_text(strip=True)
-        href = link_tag.get("href", "")
-        link = urljoin(url, href)
+        title = a.get_text(strip=True)
+        href = a.get("href", "")
+        link = urljoin(list_url, href)
 
-        match = re.search(r"no=(\d+)", href)
-        if not match:
+        post_id = extract_id(href) or extract_id(link)
+        if post_id is None:
             continue
 
-        post_no = int(match.group(1))
-
-        posts.append({
-            "title": title,
-            "link": link,
-            "no": post_no
-        })
+        posts.append({"id": post_id, "title": title, "link": link})
 
     return posts
 
 
 def main():
-    old_data = load_data()
-    new_data = old_data.copy()
+    state = load_state()
+    changed = False
 
-    for name, url in BOARDS.items():
-        recent_posts = get_recent_posts(url)
+    for b in BOARDS:
+        webhook_url = os.environ.get(b["webhook_env"])
+        if not webhook_url:
+            continue
 
-        last_saved_no = int(old_data.get(name, 0))
+        last_id = int(state.get(b["key"], 0))
+        recent = get_recent_posts(b["url"], limit=12)
 
-        # 저장된 번호보다 큰 것만 필터
-        new_posts = [p for p in recent_posts if p["no"] > last_saved_no]
-
+        new_posts = [p for p in recent if p["id"] > last_id]
         if not new_posts:
             continue
 
-        # 오래된 것부터 보내기 위해 오름차순 정렬
-        new_posts.sort(key=lambda x: x["no"])
+        new_posts.sort(key=lambda x: x["id"])  # 오래된 것부터
 
-        for post in new_posts:
-            message = f"📢 [{name}]\n{post['title']}\n<{post['link']}>"
-            send_discord_message(message)
+        for p in new_posts:
+            msg = f"📢 [{b['name']}]\n{p['title']}\n<{p['link']}>"
+            send_discord(webhook_url, msg)
 
-        # 가장 최신 번호 저장
-        new_data[name] = max(p["no"] for p in new_posts)
+        state[b["key"]] = max(p["id"] for p in new_posts)
+        changed = True
 
-    save_data(new_data)
+    if changed:
+        save_state(state)
 
 
 if __name__ == "__main__":
