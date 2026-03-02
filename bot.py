@@ -163,6 +163,7 @@ def get_recent_posts(list_url: str, limit: int = 12):
     soup = BeautifulSoup(r.text, "html.parser")
 
     rows = soup.select("table tbody tr")
+    print(f"[DEBUG] rows found: {len(rows)} from {list_url}")
     posts = []
 
     for row in rows[:limit]:
@@ -179,7 +180,10 @@ def get_recent_posts(list_url: str, limit: int = 12):
             continue
 
         posts.append({"id": post_id, "title": title, "link": link})
-
+    print(f"[DEBUG] posts found: {len(posts)} from {list_url}")
+    if posts:
+        print(f"[DEBUG] first id/title: {posts[0]['id']} / {posts[0]['title']}")
+    
     return posts
 
 
