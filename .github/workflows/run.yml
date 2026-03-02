@@ -27,13 +27,13 @@ jobs:
 
       - name: Run bot
         env:
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          WEBHOOK_INT_RECRUIT: ${{ secrets.WEBHOOK_INT_RECRUIT }}
         run: python bot.py
 
       - name: Commit data
         run: |
           git config user.name "bot"
           git config user.email "bot@github.com"
-          git add latest_posts.json || true
+          git add state.json || true
           git commit -m "update data" || true
           git push || true
