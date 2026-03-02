@@ -109,7 +109,7 @@ def save_state(state: dict) -> None:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
-def safe_get(url: str, tries: int = 4, timeout: int = 45) -> requests.Response:
+def safe_get(url: str, tries: int = 4, timeout: int = 35) -> requests.Response:
     last_err = None
     for i in range(tries):
         try:
@@ -119,7 +119,7 @@ def safe_get(url: str, tries: int = 4, timeout: int = 45) -> requests.Response:
         except Exception as e:
             last_err = e
             print(f"[WARN] GET failed ({i+1}/{tries}) {url} -> {e}")
-            time.sleep(3)
+            time.sleep(2)
     raise last_err
 
 
