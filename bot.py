@@ -8,18 +8,13 @@ import requests
 from bs4 import BeautifulSoup
 
 HEADERS = {
-    # 1) 가장 중요: "브라우저인 척" 하는 문자열
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-
-    # 2) 브라우저가 보통 보내는 '받을 수 있는 타입' 힌트
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-
-    # 3) 한국 사이트면 특히 도움 됨 (서버가 언어/인코딩을 안정적으로 잡는 경우가 있음)
     "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
-
-    # 4) 연결 유지 힌트 (필수는 아님. 효과는 서버마다 다름)
     "Connection": "keep-alive",
 }
+
+# ✅ 연결 재사용(속도/안정성↑)
 SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
 
@@ -45,52 +40,52 @@ BOARDS = [
         "webhook_env": "WEBHOOK_INT_JOB",
     },
     {
-    "key": "HUM_NOTICE",
-    "name": "인문대 / 공지",
-    "url": "https://human.cnu.ac.kr/human/community/notice.do",
-    "webhook_env": "WEBHOOK_HUM_NOTICE",
+        "key": "HUM_NOTICE",
+        "name": "인문대 / 공지",
+        "url": "https://human.cnu.ac.kr/human/community/notice.do",
+        "webhook_env": "WEBHOOK_HUM_NOTICE",
     },
     {
-    "key": "JPN_NOTICE",
-    "name": "일어일문과 / Main Notice(학부)",
-    "url": "https://cnujapan.cnu.ac.kr/japanese/notice/undergraduate.do",
-    "webhook_env": "WEBHOOK_JPN_NOTICE",
-     },
-    {
-    "key": "PLUS_NEWS",
-    "name": "학교공지 / 새소식",
-    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0701&site_dvs_cd=kr&menu_dvs_cd=0701",
-    "webhook_env": "WEBHOOK_PLUS_NEWS",
+        "key": "JPN_NOTICE",
+        "name": "일어일문과 / Main Notice(학부)",
+        "url": "https://cnujapan.cnu.ac.kr/japanese/notice/undergraduate.do",
+        "webhook_env": "WEBHOOK_JPN_NOTICE",
     },
     {
-    "key": "PLUS_ACAD",
-    "name": "학교공지 / 학사정보",
-    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0702&site_dvs_cd=kr&menu_dvs_cd=0702",
-    "webhook_env": "WEBHOOK_PLUS_ACAD",
+        "key": "PLUS_NEWS",
+        "name": "학교공지 / 새소식",
+        "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0701&site_dvs_cd=kr&menu_dvs_cd=0701",
+        "webhook_env": "WEBHOOK_PLUS_NEWS",
     },
     {
-    "key": "PLUS_EDU",
-    "name": "학교공지 / 교육정보",
-    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0704&site_dvs_cd=kr&menu_dvs_cd=0704",
-    "webhook_env": "WEBHOOK_PLUS_EDU",
+        "key": "PLUS_ACAD",
+        "name": "학교공지 / 학사정보",
+        "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0702&site_dvs_cd=kr&menu_dvs_cd=0702",
+        "webhook_env": "WEBHOOK_PLUS_ACAD",
     },
     {
-    "key": "PLUS_STARTUP",
-    "name": "학교공지 / 사업단 창업&교육",
-    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0709&site_dvs_cd=kr&menu_dvs_cd=0709",
-    "webhook_env": "WEBHOOK_PLUS_STARTUP",
+        "key": "PLUS_EDU",
+        "name": "학교공지 / 교육정보",
+        "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0704&site_dvs_cd=kr&menu_dvs_cd=0704",
+        "webhook_env": "WEBHOOK_PLUS_EDU",
     },
     {
-    "key": "PLUS_HIRE",
-    "name": "학교공지 / 채용&초빙",
-    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0705&site_dvs_cd=kr&menu_dvs_cd=0705",
-    "webhook_env": "WEBHOOK_PLUS_HIRE",
+        "key": "PLUS_STARTUP",
+        "name": "학교공지 / 사업단 창업&교육",
+        "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0709&site_dvs_cd=kr&menu_dvs_cd=0709",
+        "webhook_env": "WEBHOOK_PLUS_STARTUP",
     },
     {
-    "key": "PLUS_SEMINAR",
-    "name": "학교공지 / 세미나&행사",
-    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub010714&site_dvs_cd=kr&menu_dvs_cd=0712",
-    "webhook_env": "WEBHOOK_PLUS_SEMINAR",
+        "key": "PLUS_HIRE",
+        "name": "학교공지 / 채용&초빙",
+        "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0705&site_dvs_cd=kr&menu_dvs_cd=0705",
+        "webhook_env": "WEBHOOK_PLUS_HIRE",
+    },
+    {
+        "key": "PLUS_SEMINAR",
+        "name": "학교공지 / 세미나&행사",
+        "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub010714&site_dvs_cd=kr&menu_dvs_cd=0712",
+        "webhook_env": "WEBHOOK_PLUS_SEMINAR",
     },
 ]
 
@@ -109,6 +104,7 @@ def save_state(state: dict) -> None:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
+# ✅ 속도/안정 밸런스 추천값
 def safe_get(url: str, tries: int = 4, timeout: int = 35) -> requests.Response:
     last_err = None
     for i in range(tries):
@@ -128,7 +124,6 @@ def safe_post(webhook_url: str, text: str, tries: int = 3, timeout: int = 20) ->
     for i in range(tries):
         try:
             r = requests.post(webhook_url, json={"content": text}, timeout=timeout)
-            # Discord는 보통 204/200
             if r.status_code >= 400:
                 raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:200]}")
             return
@@ -175,6 +170,9 @@ def main():
     changed = False
 
     for b in BOARDS:
+        start = time.time()
+        print(f"[START] {b['key']} {b['url']}")
+
         webhook_url = os.environ.get(b["webhook_env"])
         if not webhook_url:
             print(f"[INFO] Missing env: {b['webhook_env']} (skip)")
@@ -186,9 +184,11 @@ def main():
 
             new_posts = [p for p in recent if p["id"] > last_id]
             if not new_posts:
+                print(f"[DONE]  {b['key']} no new posts ({time.time()-start:.1f}s)")
+                time.sleep(1)
                 continue
 
-            new_posts.sort(key=lambda x: x["id"])  # 오래된 것부터
+            new_posts.sort(key=lambda x: x["id"])
 
             for p in new_posts:
                 msg = f"📢 [{b['name']}]\n{p['title']}\n<{p['link']}>"
@@ -198,8 +198,10 @@ def main():
             changed = True
 
         except Exception as e:
-            # 여기서 죽지 말고 다음으로
             print(f"[ERROR] Board failed: {b['key']} -> {e}")
+
+        print(f"[DONE]  {b['key']} took {time.time()-start:.1f}s")
+        time.sleep(1)  # ✅ 보드 간 쉬기
 
     if changed:
         save_state(state)
