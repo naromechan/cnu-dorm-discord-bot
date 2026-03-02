@@ -20,6 +20,9 @@ HEADERS = {
     # 4) 연결 유지 힌트 (필수는 아님. 효과는 서버마다 다름)
     "Connection": "keep-alive",
 }
+SESSION = requests.Session()
+SESSION.headers.update(HEADERS)
+
 STATE_FILE = "latest_posts.json"
 
 BOARDS = [
@@ -106,17 +109,17 @@ def save_state(state: dict) -> None:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
-def safe_get(url: str, tries: int = 3, timeout: int = 25) -> requests.Response:
+def safe_get(url: str, tries: int = 4, timeout: int = 45) -> requests.Response:
     last_err = None
     for i in range(tries):
         try:
-            r = requests.get(url, headers=HEADERS, timeout=timeout)
+            r = SESSION.get(url, timeout=timeout)
             r.raise_for_status()
             return r
         except Exception as e:
             last_err = e
             print(f"[WARN] GET failed ({i+1}/{tries}) {url} -> {e}")
-            time.sleep(2)
+            time.sleep(3)
     raise last_err
 
 
