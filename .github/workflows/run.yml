@@ -34,6 +34,6 @@ jobs:
         run: |
           git config user.name "bot"
           git config user.email "bot@github.com"
-          git add state.json || true
+          git add latest_posts.json || true
           git commit -m "update data" || true
           git push || true
