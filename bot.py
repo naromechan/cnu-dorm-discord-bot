@@ -41,6 +41,42 @@ BOARDS = [
     "url": "https://cnujapan.cnu.ac.kr/japanese/notice/undergraduate.do",
     "webhook_env": "WEBHOOK_JPN_NOTICE",
      },
+    {
+    "key": "PLUS_NEWS",
+    "name": "학교공지 / 새소식",
+    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0701&site_dvs_cd=kr&menu_dvs_cd=0701",
+    "webhook_env": "WEBHOOK_PLUS_NEWS",
+    },
+    {
+    "key": "PLUS_ACAD",
+    "name": "학교공지 / 학사정보",
+    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0702&site_dvs_cd=kr&menu_dvs_cd=0702",
+    "webhook_env": "WEBHOOK_PLUS_ACAD",
+    },
+    {
+    "key": "PLUS_EDU",
+    "name": "학교공지 / 교육정보",
+    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0704&site_dvs_cd=kr&menu_dvs_cd=0704",
+    "webhook_env": "WEBHOOK_PLUS_EDU",
+    },
+    {
+    "key": "PLUS_STARTUP",
+    "name": "학교공지 / 사업단 창업&교육",
+    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0709&site_dvs_cd=kr&menu_dvs_cd=0709",
+    "webhook_env": "WEBHOOK_PLUS_STARTUP",
+    },
+    {
+    "key": "PLUS_HIRE",
+    "name": "학교공지 / 채용&초빙",
+    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub07_0705&site_dvs_cd=kr&menu_dvs_cd=0705",
+    "webhook_env": "WEBHOOK_PLUS_HIRE",
+    },
+    {
+    "key": "PLUS_SEMINAR",
+    "name": "학교공지 / 세미나&행사",
+    "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub010714&site_dvs_cd=kr&menu_dvs_cd=0712",
+    "webhook_env": "WEBHOOK_PLUS_SEMINAR",
+    },
 ]
 
 ID_RE = re.compile(r"(?:articleNo|no)=(\d+)", re.IGNORECASE)
