@@ -1,0 +1,29 @@
+name: CNU Dorm Bot
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run bot
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+        run: python bot.py
+      - name: Commit data
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@github.com"
+          git add data.json || true
+          git commit -m "update data" || true
+          git push || true
