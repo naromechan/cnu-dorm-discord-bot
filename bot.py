@@ -23,6 +23,8 @@ import re
 
 def get_latest_posts(url, limit=5):
     r = requests.get(url, headers=HEADERS, timeout=10)
+    print("PAGE LENGTH:", len(r.text))
+    print(r.text[:1000])
     r.encoding = "utf-8"
 
     soup = BeautifulSoup(r.text, "html.parser")
