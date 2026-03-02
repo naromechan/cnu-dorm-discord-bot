@@ -38,7 +38,7 @@ def get_latest_posts(url, limit=5):
         title = link_tag.get_text(strip=True)
 
         href = link_tag.get("href", "")
-
+        print("DEBUG HREF:", href)
         # 🔥 javascript:fnView('12345') 형태 처리
         match = re.search(r"\('(\d+)'\)", href)
         if match:
