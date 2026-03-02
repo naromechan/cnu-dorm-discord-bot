@@ -19,9 +19,11 @@ BASE_URL = "https://dorm.cnu.ac.kr"
 def send_discord_message(content):
     requests.post(WEBHOOK_URL, json={"content": content})
 
+import re
+
 def get_latest_posts(url, limit=5):
     r = requests.get(url, headers=HEADERS, timeout=10)
-    r.encoding = "utf-8"   # ✅ 한글 깨짐 방지
+    r.encoding = "utf-8"
 
     soup = BeautifulSoup(r.text, "html.parser")
 
@@ -35,15 +37,24 @@ def get_latest_posts(url, limit=5):
 
         title = link_tag.get_text(strip=True)
 
-        href = link_tag.get("href")
-        if not href:
-            continue
+        href = link_tag.get("href", "")
 
-        # ✅ 게시글 상세페이지 링크 정확히 생성
-        if href.startswith("http"):
-            link = href
+        # 🔥 javascript:fnView('12345') 형태 처리
+        match = re.search(r"\('(\d+)'\)", href)
+        if match:
+            post_no = match.group(1)
+
+            # 현재 게시판 URL에서 필요한 파라미터 추출
+            base = url.split("?")[0]
+            params = url.split("?")[1]
+
+            link = f"{base}?{params}&mode=view&no={post_no}"
         else:
-            link = BASE_URL + href
+            # 혹시 그냥 일반 링크면
+            if href.startswith("http"):
+                link = href
+            else:
+                link = BASE_URL + href
 
         posts.append((title, link))
 
