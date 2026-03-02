@@ -9,13 +9,12 @@ from bs4 import BeautifulSoup
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 STATE_FILE = "latest_posts.json"
 
-# ✅ 일단 1개만 테스트: 국제교류본부 Student Recruiting
 BOARDS = [
     {
         "key": "INT_RECRUIT",
         "name": "국제교류본부 / Student Recruiting",
         "url": "https://cnuint.cnu.ac.kr/cnuint/notice/recruit.do",
-        "webhook_env": "WEBHOOK_INT_RECRUIT",  # ✅ 너가 방금 만든 Secret 이름
+        "webhook_env": "WEBHOOK_INT_RECRUIT",
     }
 ]
 
