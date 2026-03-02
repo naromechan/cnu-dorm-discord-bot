@@ -123,7 +123,7 @@ def save_state(state: dict) -> None:
 
 
 # ✅ 속도/안정 밸런스 추천값
-def safe_get(url: str, tries: int = 4, timeout: int = 35) -> requests.Response:
+def safe_get(url: str, tries: int = 2, timeout: int = 20) -> requests.Response:
     last_err = None
     for i in range(tries):
         try:
