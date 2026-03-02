@@ -32,6 +32,12 @@ jobs:
           WEBHOOK_INT_JOB: ${{ secrets.WEBHOOK_INT_JOB }}
           WEBHOOK_HUM_NOTICE: ${{ secrets.WEBHOOK_HUM_NOTICE }}
           WEBHOOK_JPN_NOTICE: ${{ secrets.WEBHOOK_JPN_NOTICE }}
+          WEBHOOK_PLUS_NEWS: ${{ secrets.WEBHOOK_PLUS_NEWS }}
+          WEBHOOK_PLUS_ACAD: ${{ secrets.WEBHOOK_PLUS_ACAD }}
+          WEBHOOK_PLUS_EDU: ${{ secrets.WEBHOOK_PLUS_EDU }}
+          WEBHOOK_PLUS_STARTUP: ${{ secrets.WEBHOOK_PLUS_STARTUP }}
+          WEBHOOK_PLUS_HIRE: ${{ secrets.WEBHOOK_PLUS_HIRE }}
+          WEBHOOK_PLUS_SEMINAR: ${{ secrets.WEBHOOK_PLUS_SEMINAR }}
         run: python bot.py
 
       - name: Commit data
