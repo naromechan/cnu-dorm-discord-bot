@@ -88,7 +88,7 @@ def main():
         new_posts.sort(key=lambda x: x["no"])
 
         for post in new_posts:
-            message = f"📢 [{name}]\n{post['title']}\n{post['link']}"
+            message = f"📢 [{name}]\n{post['title']}\n<{post['link']}>"
             send_discord_message(message)
 
         # 가장 최신 번호 저장
