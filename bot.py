@@ -37,21 +37,7 @@ def save_data(data):
         json.dump(data, f)
 
 def main():
-    old_data = load_data()
-    new_data = {}
-
-    for name, url in BOARDS.items():
-        title, link = get_latest_post(url)
-        if not title:
-            continue
-
-        new_data[name] = title
-
-        if old_data.get(name) != title:
-            message = f"📢 [{name}]\n{title}\n{link}"
-            send_discord_message(message)
-
-    save_data(new_data)
+    send_discord_message("✅ 디스코드 연결 테스트 성공!")
 
 if __name__ == "__main__":
     main()
