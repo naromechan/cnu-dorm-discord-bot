@@ -87,7 +87,25 @@ BOARDS = [
         "url": "https://plus.cnu.ac.kr/_prog/_board/?code=sub010714&site_dvs_cd=kr&menu_dvs_cd=0712",
         "webhook_env": "WEBHOOK_PLUS_SEMINAR",
     },
-]
+    {
+    "key": "DORM_MOVE",
+    "name": "기숙사 / 입주·퇴거 공지",
+    "url": "https://dorm.cnu.ac.kr/_prog/_board/?code=sub05_0501&site_dvs_cd=kr&menu_dvs_cd=030601",
+    "webhook_env": "WEBHOOK_DORM_MOVE",
+    },
+    {
+    "key": "DORM_GENERAL",
+    "name": "기숙사 / 일반 공지",
+    "url": "https://dorm.cnu.ac.kr/_prog/_board/?code=sub03_0301&site_dvs_cd=kr&menu_dvs_cd=0302",
+    "webhook_env": "WEBHOOK_DORM_GENERAL",
+    },
+    {
+    "key": "DORM_WORK",
+    "name": "기숙사 / 작업 공지",
+    "url": "https://dorm.cnu.ac.kr/_prog/_board/?code=sub03_0302&site_dvs_cd=kr&menu_dvs_cd=0303",
+    "webhook_env": "WEBHOOK_DORM_WORK",
+    },
+    ]
 
 ID_RE = re.compile(r"(?:articleNo|no)=(\d+)", re.IGNORECASE)
 
