@@ -36,29 +36,37 @@ def send_discord_message(content):
     requests.post(WEBHOOK_URL, json={"content": content})
 
 
-def get_latest_post(url):
+def get_recent_posts(url, limit=10):
     r = requests.get(url, headers=HEADERS, timeout=10)
     r.encoding = "utf-8"
 
     soup = BeautifulSoup(r.text, "html.parser")
-    row = soup.select_one("table tbody tr")
+    rows = soup.select("table tbody tr")
 
-    if not row:
-        return None, None, None
+    posts = []
 
-    link_tag = row.select_one("a")
-    if not link_tag:
-        return None, None, None
+    for row in rows[:limit]:
+        link_tag = row.select_one("a")
+        if not link_tag:
+            continue
 
-    title = link_tag.get_text(strip=True)
-    href = link_tag.get("href", "")
+        title = link_tag.get_text(strip=True)
+        href = link_tag.get("href", "")
+        link = urljoin(url, href)
 
-    link = urljoin(url, href)
+        match = re.search(r"no=(\d+)", href)
+        if not match:
+            continue
 
-    match = re.search(r"no=(\d+)", href)
-    post_no = match.group(1) if match else None
+        post_no = int(match.group(1))
 
-    return title, link, post_no
+        posts.append({
+            "title": title,
+            "link": link,
+            "no": post_no
+        })
+
+    return posts
 
 
 def main():
@@ -66,15 +74,25 @@ def main():
     new_data = old_data.copy()
 
     for name, url in BOARDS.items():
-        title, link, post_no = get_latest_post(url)
+        recent_posts = get_recent_posts(url)
 
-        if not post_no:
+        last_saved_no = int(old_data.get(name, 0))
+
+        # 저장된 번호보다 큰 것만 필터
+        new_posts = [p for p in recent_posts if p["no"] > last_saved_no]
+
+        if not new_posts:
             continue
 
-        if old_data.get(name) != post_no:
-            message = f"📢 [{name}]\n{title}\n{link}"
+        # 오래된 것부터 보내기 위해 오름차순 정렬
+        new_posts.sort(key=lambda x: x["no"])
+
+        for post in new_posts:
+            message = f"📢 [{name}]\n{post['title']}\n{post['link']}"
             send_discord_message(message)
-            new_data[name] = post_no
+
+        # 가장 최신 번호 저장
+        new_data[name] = max(p["no"] for p in new_posts)
 
     save_data(new_data)
 
