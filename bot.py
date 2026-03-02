@@ -7,7 +7,19 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-HEADERS = {"User-Agent": "Mozilla/5.0"}
+HEADERS = {
+    # 1) 가장 중요: "브라우저인 척" 하는 문자열
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+
+    # 2) 브라우저가 보통 보내는 '받을 수 있는 타입' 힌트
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+
+    # 3) 한국 사이트면 특히 도움 됨 (서버가 언어/인코딩을 안정적으로 잡는 경우가 있음)
+    "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+
+    # 4) 연결 유지 힌트 (필수는 아님. 효과는 서버마다 다름)
+    "Connection": "keep-alive",
+}
 STATE_FILE = "latest_posts.json"
 
 BOARDS = [
