@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import json
+import re
 from urllib.parse import urljoin
 
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
@@ -15,64 +17,67 @@ BOARDS = {
     "작업공지": "https://dorm.cnu.ac.kr/_prog/_board/?code=sub03_0302&site_dvs_cd=kr&menu_dvs_cd=0303",
 }
 
-BASE_URL = "https://dorm.cnu.ac.kr"
+DATA_FILE = "latest_posts.json"
+
+
+def load_data():
+    if not os.path.exists(DATA_FILE):
+        return {}
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_data(data):
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
 
 def send_discord_message(content):
     requests.post(WEBHOOK_URL, json={"content": content})
 
-import re
 
-def get_latest_posts(url, limit=5):
+def get_latest_post(url):
     r = requests.get(url, headers=HEADERS, timeout=10)
-    print("PAGE LENGTH:", len(r.text))
-    print(r.text[:1000])
     r.encoding = "utf-8"
 
     soup = BeautifulSoup(r.text, "html.parser")
+    row = soup.select_one("table tbody tr")
 
-    rows = soup.select("table tbody tr")
-    posts = []
+    if not row:
+        return None, None, None
 
-    for row in rows:
-        link_tag = row.select_one("a")
-        if not link_tag:
-            continue
+    link_tag = row.select_one("a")
+    if not link_tag:
+        return None, None, None
 
-        title = link_tag.get_text(strip=True)
+    title = link_tag.get_text(strip=True)
+    href = link_tag.get("href", "")
 
-        href = link_tag.get("href", "")
-        print("DEBUG HREF:", href)
-        # 🔥 javascript:fnView('12345') 형태 처리
-        match = re.search(r"\('(\d+)'\)", href)
-        if match:
-            post_no = match.group(1)
+    link = urljoin(url, href)
 
-            # 현재 게시판 URL에서 필요한 파라미터 추출
-            base = url.split("?")[0]
-            params = url.split("?")[1]
+    match = re.search(r"no=(\d+)", href)
+    post_no = match.group(1) if match else None
 
-            link = f"{base}?{params}&mode=view&no={post_no}"
-        else:
-            # 혹시 그냥 일반 링크면
-            if href.startswith("http"):
-                link = href
-            else:
-                link = urljoin(url, href)
+    return title, link, post_no
 
-        posts.append((title, link))
-
-        if len(posts) >= limit:
-            break
-
-    return posts
 
 def main():
-    for name, url in BOARDS.items():
-        posts = get_latest_posts(url, limit=5)
+    old_data = load_data()
+    new_data = old_data.copy()
 
-        for title, link in posts:
+    for name, url in BOARDS.items():
+        title, link, post_no = get_latest_post(url)
+
+        if not post_no:
+            continue
+
+        if old_data.get(name) != post_no:
             message = f"📢 [{name}]\n{title}\n{link}"
             send_discord_message(message)
+            new_data[name] = post_no
+
+    save_data(new_data)
+
 
 if __name__ == "__main__":
     main()
