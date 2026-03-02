@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+from urllib.parse import urljoin
 
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 
@@ -56,7 +57,7 @@ def get_latest_posts(url, limit=5):
             if href.startswith("http"):
                 link = href
             else:
-                link = BASE_URL + href
+                link = urljoin(url, href)
 
         posts.append((title, link))
 
