@@ -31,6 +31,7 @@ jobs:
           WEBHOOK_INT_EVENT: ${{ secrets.WEBHOOK_INT_EVENT }}
           WEBHOOK_INT_JOB: ${{ secrets.WEBHOOK_INT_JOB }}
           WEBHOOK_HUM_NOTICE: ${{ secrets.WEBHOOK_HUM_NOTICE }}
+          WEBHOOK_JPN_NOTICE: ${{ secrets.WEBHOOK_JPN_NOTICE }}
         run: python bot.py
 
       - name: Commit data
