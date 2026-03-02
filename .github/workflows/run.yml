@@ -3,6 +3,7 @@ name: CNU Dorm Bot
 on:
   schedule:
     - cron: "0 0 * * *"   # 매일 00:00 UTC = 매일 09:00 KST
+    - cron: "0 1 * * *"   # 10:00
   workflow_dispatch:
 
 permissions:
