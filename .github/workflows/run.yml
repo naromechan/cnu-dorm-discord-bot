@@ -39,6 +39,9 @@ jobs:
           WEBHOOK_PLUS_STARTUP: ${{ secrets.WEBHOOK_PLUS_STARTUP }}
           WEBHOOK_PLUS_HIRE: ${{ secrets.WEBHOOK_PLUS_HIRE }}
           WEBHOOK_PLUS_SEMINAR: ${{ secrets.WEBHOOK_PLUS_SEMINAR }}
+          WEBHOOK_DORM_MOVE: ${{ secrets.WEBHOOK_DORM_MOVE }}
+          WEBHOOK_DORM_GENERAL: ${{ secrets.WEBHOOK_DORM_GENERAL }}
+          WEBHOOK_DORM_WORK: ${{ secrets.WEBHOOK_DORM_WORK }}
         run: python bot.py
 
       - name: Commit data
