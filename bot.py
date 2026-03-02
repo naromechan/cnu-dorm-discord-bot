@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
-STATE_FILE = "state.json"
+STATE_FILE = "latest_posts.json"
 
 # ✅ 일단 1개만 테스트: 국제교류본부 Student Recruiting
 BOARDS = [
