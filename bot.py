@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import time
 from urllib.parse import urljoin
 
 import requests
@@ -33,17 +34,43 @@ def save_state(state: dict) -> None:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
-def send_discord(webhook_url: str, text: str) -> None:
-    requests.post(webhook_url, json={"content": text}, timeout=15)
+def safe_get(url: str, tries: int = 3, timeout: int = 25) -> requests.Response:
+    last_err = None
+    for i in range(tries):
+        try:
+            r = requests.get(url, headers=HEADERS, timeout=timeout)
+            r.raise_for_status()
+            return r
+        except Exception as e:
+            last_err = e
+            print(f"[WARN] GET failed ({i+1}/{tries}) {url} -> {e}")
+            time.sleep(2)
+    raise last_err
 
 
-def extract_id(s: str) -> int | None:
+def safe_post(webhook_url: str, text: str, tries: int = 3, timeout: int = 20) -> None:
+    last_err = None
+    for i in range(tries):
+        try:
+            r = requests.post(webhook_url, json={"content": text}, timeout=timeout)
+            # Discord는 보통 204/200
+            if r.status_code >= 400:
+                raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:200]}")
+            return
+        except Exception as e:
+            last_err = e
+            print(f"[WARN] POST failed ({i+1}/{tries}) -> {e}")
+            time.sleep(2)
+    raise last_err
+
+
+def extract_id(s: str):
     m = ID_RE.search(s or "")
     return int(m.group(1)) if m else None
 
 
-def get_recent_posts(list_url: str, limit: int = 12) -> list[dict]:
-    r = requests.get(list_url, headers=HEADERS, timeout=20)
+def get_recent_posts(list_url: str, limit: int = 12):
+    r = safe_get(list_url)
     r.encoding = "utf-8"
     soup = BeautifulSoup(r.text, "html.parser")
 
@@ -75,23 +102,29 @@ def main():
     for b in BOARDS:
         webhook_url = os.environ.get(b["webhook_env"])
         if not webhook_url:
+            print(f"[INFO] Missing env: {b['webhook_env']} (skip)")
             continue
 
-        last_id = int(state.get(b["key"], 0))
-        recent = get_recent_posts(b["url"], limit=12)
+        try:
+            last_id = int(state.get(b["key"], 0))
+            recent = get_recent_posts(b["url"], limit=12)
 
-        new_posts = [p for p in recent if p["id"] > last_id]
-        if not new_posts:
-            continue
+            new_posts = [p for p in recent if p["id"] > last_id]
+            if not new_posts:
+                continue
 
-        new_posts.sort(key=lambda x: x["id"])  # 오래된 것부터
+            new_posts.sort(key=lambda x: x["id"])  # 오래된 것부터
 
-        for p in new_posts:
-            msg = f"📢 [{b['name']}]\n{p['title']}\n<{p['link']}>"
-            send_discord(webhook_url, msg)
+            for p in new_posts:
+                msg = f"📢 [{b['name']}]\n{p['title']}\n<{p['link']}>"
+                safe_post(webhook_url, msg)
 
-        state[b["key"]] = max(p["id"] for p in new_posts)
-        changed = True
+            state[b["key"]] = max(p["id"] for p in new_posts)
+            changed = True
+
+        except Exception as e:
+            # 여기서 죽지 말고 다음으로
+            print(f"[ERROR] Board failed: {b['key']} -> {e}")
 
     if changed:
         save_state(state)
