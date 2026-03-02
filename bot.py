@@ -29,6 +29,12 @@ BOARDS = [
         "url": "https://cnuint.cnu.ac.kr/cnuint/notice/job.do",
         "webhook_env": "WEBHOOK_INT_JOB",
     },
+    {
+    "key": "HUM_NOTICE",
+    "name": "인문대 / 공지",
+    "url": "https://human.cnu.ac.kr/human/community/notice.do",
+    "webhook_env": "WEBHOOK_HUM_NOTICE",
+    },
 ]
 
 ID_RE = re.compile(r"(?:articleNo|no)=(\d+)", re.IGNORECASE)
