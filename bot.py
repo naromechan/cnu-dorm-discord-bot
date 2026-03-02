@@ -36,21 +36,30 @@ def save_data(data):
     with open("data.json", "w") as f:
         json.dump(data, f)
 
-def main():
-    old_data = load_data()
-    new_data = {}
-
-    for name, url in BOARDS.items():
-        title, link = get_latest_post(url)
-        if not title:
+def get_latest_posts(url, limit=5):
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, "html.parser")
+    rows = soup.select("tbody tr")
+    
+    posts = []
+    for row in rows[:limit]:
+        title_tag = row.select_one("a")
+        if not title_tag:
             continue
+        title = title_tag.text.strip()
+        link = "https://dorm.cnu.ac.kr" + title_tag["href"]
+        posts.append((title, link))
+    
+    return posts
 
-        new_data[name] = title
 
-        if old_data.get(name) != title:
+def main():
+    for name, url in BOARDS.items():
+        posts = get_latest_posts(url, limit=5)
+        
+        for title, link in posts:
             message = f"📢 [{name}]\n{title}\n{link}"
             send_discord_message(message)
-
     save_data(new_data)
 
 if __name__ == "__main__":
