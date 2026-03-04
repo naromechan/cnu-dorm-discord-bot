@@ -162,9 +162,11 @@ def get_recent_posts(list_url: str, limit: int = 12):
     r.encoding = "utf-8"
     soup = BeautifulSoup(r.text, "html.parser")
 
-    rows = soup.select("table tbody tr")
-    print(f"[DEBUG] rows found: {len(rows)} from {list_url}")
     posts = []
+
+    # 1) 기존 테이블형(대부분 공지)
+    rows = soup.select("table tbody tr")
+    print(f"[DEBUG] rows found: {len(rows)} from {list_url}", flush=True)
 
     for row in rows[:limit]:
         a = row.select_one("a")
@@ -180,10 +182,52 @@ def get_recent_posts(list_url: str, limit: int = 12):
             continue
 
         posts.append({"id": post_id, "title": title, "link": link})
-    print(f"[DEBUG] posts found: {len(posts)} from {list_url}")
+
+    # 2) ✅ 카드/갤러리형 fallback (세미나 같은 경우)
+    if not posts:
+        # plus 계열에서 글보기 링크는 보통 mode=V / no= 형태
+        links = soup.select('a[href*="mode=V"], a[href*="no="], a[href*="articleNo="]')
+        seen = set()
+
+        for a in links:
+            href = a.get("href", "")
+            if not href:
+                continue
+
+            post_id = extract_id(href)
+            if post_id is None:
+                # 절대 URL로 만든 뒤 다시 추출 시도
+                link = urljoin(list_url, href)
+                post_id = extract_id(link)
+            else:
+                link = urljoin(list_url, href)
+
+            if post_id is None:
+                continue
+            if post_id in seen:
+                continue
+            seen.add(post_id)
+
+            # 카드형은 a 텍스트가 비어있을 때가 많아서, 주변에서 제목을 보강
+            title = a.get_text(" ", strip=True)
+            if not title:
+                # a의 부모/조상에서 텍스트를 좀 긁어오기
+                parent = a.parent
+                title = parent.get_text(" ", strip=True) if parent else ""
+                title = " ".join(title.split())[:120].strip()
+
+            if not title:
+                title = "(제목 추출 실패)"
+
+            posts.append({"id": post_id, "title": title, "link": link})
+
+            if len(posts) >= limit:
+                break
+
+    print(f"[DEBUG] posts found: {len(posts)} from {list_url}", flush=True)
     if posts:
-        print(f"[DEBUG] first id/title: {posts[0]['id']} / {posts[0]['title']}")
-    
+        print(f"[DEBUG] first id/title: {posts[0]['id']} / {posts[0]['title']}", flush=True)
+
     return posts
 
 
